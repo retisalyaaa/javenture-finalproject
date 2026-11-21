@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Javenture | Explore Yogyakarta</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Leaflet untuk peta -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="logo">Javenture.</a>
+
+        <div class="nav-links">
+            <a href="{{ url_for('dashboard') }}">Home</a>
+            <a href="#about">About</a>
+            <a href="#destinasi">Destinations</a>
+            <a href="#fitur">Features</a>
+            <a href="#peta" class="nav-button">Explore Jogja</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero">
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <span class="hero-tag">YOUR JOGJA TRAVEL COMPANION</span>
+
+            <h1>
+                Discover Jogja,<br>
+                Create Your Own Adventure.
+            </h1>
+
+            <p>
+                Temukan destinasi menarik, dapatkan informasi wisata,
+                dan rencanakan perjalananmu di Yogyakarta bersama Javenture.
+            </p>
+
+            <a href="#destinasi" class="hero-button">
+                Explore Destinations
+                <span>→</span>
+            </a>
+        </div>
+
+        <div class="hero-caption">
+            <span>✦</span> Explore the beauty of Yogyakarta
+        </div>
+    </header>
+
+
+    <main>
+
+        <!-- ABOUT JAVENTURE -->
+        <section class="about-section section-container" id="about">
+
+            <div class="about-image">
+                <img
+                    src="{{ url_for('static', filename='img/hero-jogja.png') }}"
+                    alt="Pemandangan Candi dan alam Yogyakarta"
+                    loading="lazy"
+                >
+                <div class="image-label">
+                    <span>✦</span>
+                    Explore Yogyakarta
+                </div>
+            </div>
+
+            <div class="about-content">
+                <span class="section-tag">ABOUT JAVENTURE</span>
+
+                <h2>
+                    Your Journey,<br>
+                    Our Inspiration.
+                </h2>
+
+                <p>
+                    Javenture merupakan aplikasi berbasis web yang
+                    membantu wisatawan menjelajahi destinasi wisata
+                    di Yogyakarta dengan lebih mudah dan terencana.
+                </p>
+
+                <p>
+                    Melalui pemanfaatan data wisata, Javenture
+                    menghadirkan informasi destinasi, rekomendasi
+                    tempat wisata, analisis ulasan, prediksi
+                    keramaian, hingga perencanaan perjalanan.
+                </p>
+
+                <a href="#fitur" class="text-link">
+                    Discover Our Features →
+                </a>
+            </div>
+
+        </section>
+
+
+        <!-- REKOMENDASI DESTINASI -->
+        <section class="destination-section" id="destinasi">
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">FIND YOUR NEXT DESTINATION</span>
+                        <h2>Popular Destinations</h2>
+                        <p>
+                            Temukan destinasi wisata yang banyak
+                            mendapatkan penilaian dari pengguna.
+                        </p>
+                    </div>
+
+                    <span class="heading-decoration">✦ Explore Jogja</span>
+                </div>
+
+                <div class="destination-grid" id="destinationList">
+                    <p class="loading-text">Memuat rekomendasi destinasi...</p>
+                </div>
+
+                <p id="pesanError" class="error-message"></p>
+
+                <p class="data-note">
+                    *Peringkat dihitung berdasarkan jumlah penilaian
+                    pengguna pada dataset, bukan jumlah pengunjung.
+                </p>
+
+            </div>
+        </section>
+
+
+        
+        
+        <!-- EXPLORE OUR FEATURES -->
+        <section class="features-section" id="fitur">
+            <div class="section-container">
+
+                <div class="feature-heading">
+                    <div>
+                        <span class="section-tag">EXPLORE JAVENTURE</span>
+                        <h2>Your Smart Travel Experience Starts Here.</h2>
+                        <p>
+                            Temukan berbagai fitur pintar Javenture untuk
+                            membantu perjalanan wisata di Yogyakarta
+                            menjadi lebih mudah dan menyenangkan.
+                        </p>
+                    </div>
+
+                    <div class="feature-heading-label">
+                        ✦ 4 SMART FEATURES
+                    </div>
+                </div>
+
+
+                <div class="feature-menu-grid">
+
+                    <!-- FITUR 1 -->
+                    <a href="{{ url_for('sentiment') }}"
+                    class="feature-menu-card sentiment-menu">
+
+                        <div class="feature-icon-box">
+                            <span>💬</span>
+                        </div>
+
+                        <div class="feature-card-content">
+                            <span class="feature-index"></span>
+                            <h3>Analisis Sentimen</h3>
+                            <p>
+                                Kenali pengalaman dan penilaian wisatawan
+                                melalui analisis ulasan destinasi.
+                            </p>
+                        </div>
+
+                        <div class="feature-arrow">↗</div>
+                    </a>
+
+
+                    <!-- FITUR 2 -->
+                    <a href="{{ url_for('crowd') }}"
+                    class="feature-menu-card crowd-menu">
+
+                        <div class="feature-icon-box">
+                            <span>👥</span>
+                        </div>
+
+                        <div class="feature-card-content">
+                            <span class="feature-index"></span>
+                            <h3>Prediksi Keramaian</h3>
+                            <p>
+                                Ketahui perkiraan tingkat keramaian
+                                sebelum mengunjungi destinasi wisata.
+                            </p>
+                        </div>
+
+                        <div class="feature-arrow">↗</div>
+                    </a>
+
+
+                    <!-- FITUR 3 -->
+                    <a href="{{ url_for('planner') }}"
+                    class="feature-menu-card planner-menu">
+
+                        <div class="feature-icon-box">
+                            <span>🧭</span>
+                        </div>
+
+                        <div class="feature-card-content">
+                            <span class="feature-index"></span>
+                            <h3>Travel Planner</h3>
+                            <p>
+                                Susun itinerary perjalanan dan
+                                jelajahi destinasi pilihanmu.
+                            </p>
+                        </div>
+
+                        <div class="feature-arrow">↗</div>
+                    </a>
+
+
+                    <!-- FITUR 4 -->
+                    <a href="{{ url_for('chatbot') }}"
+                    class="feature-menu-card chatbot-menu">
+
+                        <div class="feature-icon-box">
+                            <span>🤖</span>
+                        </div>
+
+                        <div class="feature-card-content">
+                            <span class="feature-index"></span>
+                            <h3>Chatbot FAQ</h3>
+                            <p>
+                                Dapatkan informasi seputar wisata Jogja
+                                melalui asisten virtual Javenture.
+                            </p>
+                        </div>
+
+                        <div class="feature-arrow">↗</div>
+                    </a>
+
+                </div>
+
+            </div>
+        </section>
+
+
+
+        <!-- PETA PERSEBARAN WISATA -->
+        <section class="map-section" id="peta">
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">EXPLORE THE MAP</span>
+                        <h2>Discover Places Around Jogja</h2>
+                        <p>
+                            Lihat persebaran lokasi destinasi wisata
+                            di wilayah Yogyakarta.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="map-card">
+                    <div id="map"></div>
+                </div>
+
+                <p class="map-note">
+                    Peta menampilkan koordinat destinasi yang tersedia
+                    pada dataset Javenture.
+                </p>
+
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <a href="/" class="footer-logo">Javenture.</a>
+        <p>Discover Jogja, Create Your Own Adventure.</p>
+        <span>© 2026 Javenture. All rights reserved.</span>
+    </footer>
+
+</body>
+</html>
