@@ -1,0 +1,14 @@
+# Dashboard utama
+flask
+pandas
+
+# Disiapkan untuk pengembangan fitur machine learning berikutnya
+numpy
+scikit-learn
+joblib
+
+# Digunakan pada tahap analisis teks dan visualisasi lanjutan
+matplotlib
+wordcloud
+langdetect
+python-dotenv
