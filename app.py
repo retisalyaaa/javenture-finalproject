@@ -1,29 +1,48 @@
-"""Aplikasi dashboard utama Javenture."""
+
+"""Aplikasi utama Javenture."""
+
 from pathlib import Path
 import pandas as pd
 from flask import Flask, jsonify, render_template
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
+
 app = Flask(__name__)
 
-
+# Membaca dataset.
 def baca_csv(nama_file):
-    """Membaca file CSV dari folder data."""
     lokasi = DATA / nama_file
+
     if not lokasi.exists():
         raise FileNotFoundError(
-            f"{nama_file} belum tersedia. Jalankan: python scripts/00_import_kaggle.py"
+            f"{nama_file} belum tersedia. "
+            "Jalankan scripts/00_import_kaggle.py terlebih dahulu."
         )
+
     return pd.read_csv(lokasi)
 
-
-# Data dibaca sekali ketika aplikasi dijalankan.
 tempat = baca_csv("tempat.csv")
 rating = baca_csv("rating_interactions.csv")
 pengguna = baca_csv("users_kaggle.csv")
 
 
+# Foto destinasi berdasarkan nama atau kategori.
+FOTO_DESTINASI = {
+    "tamansari water castle":
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Taman%20Sari%2C%20Yogyakarta.jpg",
+
+    "budaya dan sejarah":
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Yogyakarta%20Indonesia%20Prambanan-temple-complex-05.jpg",
+
+    "alam":
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Bukit%20Bintang%20Yogyakarta.jpg",
+
+    "pantai":
+        "https://commons.wikimedia.org/wiki/Special:FilePath/Perahu%20di%20Pantai%20Drini.jpg",
+}
+
+# HALAMAN DASHBOARD
 @app.route("/")
 def dashboard():
     return render_template("index.html")
@@ -31,47 +50,78 @@ def dashboard():
 
 @app.route("/api/dashboard")
 def data_dashboard():
-    """Mengirim ringkasan dan data visualisasi ke halaman dashboard."""
-    ringkasan = {
-        "total_destinasi": int(tempat["place_id"].nunique()),
-        "total_kategori": int(tempat["kategori"].nunique()),
-        "rata_rating": round(float(tempat["rating_tempat"].mean()), 2),
-        "total_penilaian": int(len(rating)),
-        "total_pengguna": int(pengguna["User_Id"].nunique()),
-    }
+    """Mengirim rekomendasi destinasi dan data peta."""
 
-    # Destinasi populer dihitung dari jumlah rating pada dataset Kaggle.
-    populer = tempat.nlargest(10, "jumlah_penilaian")[[
-        "nama", "jumlah_penilaian", "rating_tempat"
-    ]]
+    # Urutkan destinasi berdasarkan jumlah penilaian.
+    populer = tempat.nlargest(
+        10, "jumlah_penilaian"
+    ).copy()
 
-    kategori = (
-        tempat.groupby("kategori").size()
-        .sort_values(ascending=False)
-        .rename_axis("kategori").reset_index(name="jumlah")
-    )
+    daftar_populer = []
 
-    sebaran_rating = (
-        tempat.assign(kelompok_rating=pd.cut(
-            tempat["rating_tempat"],
-            bins=[0, 3, 3.5, 4, 4.5, 5.01],
-            labels=["≤ 3,0", "3,1–3,5", "3,6–4,0", "4,1–4,5", "4,6–5,0"]
-        ))
-        .groupby("kelompok_rating", observed=False).size()
-        .rename_axis("rentang").reset_index(name="jumlah")
-    )
+    for _, baris in populer.iterrows():
+        kategori = str(baris["kategori"]).lower()
+        nama = str(baris["nama"]).lower()
 
+        # Cari foto berdasarkan nama destinasi.
+        foto = FOTO_DESTINASI.get(nama)
+
+        # Jika tidak ada, gunakan foto berdasarkan kategori.
+        if not foto:
+            foto = FOTO_DESTINASI.get(
+                kategori,
+                "/static/img/hero-jogja.png"
+            )
+
+        daftar_populer.append({
+            "nama": baris["nama"],
+            "kategori": baris["kategori"],
+            "rating_tempat": float(baris["rating_tempat"]),
+            "jumlah_penilaian": int(baris["jumlah_penilaian"]),
+            "foto": foto
+        })
+
+    # Siapkan data koordinat untuk peta.
     kolom_peta = tempat[[
-        "nama", "kategori", "latitude", "longitude", "rating_tempat", "harga_tiket"
+        "nama",
+        "kategori",
+        "latitude",
+        "longitude",
+        "rating_tempat"
     ]].copy()
 
+    kolom_peta = kolom_peta.where(
+        pd.notna(kolom_peta), None
+    )
+
     return jsonify({
-        "ringkasan": ringkasan,
-        "populer": populer.to_dict(orient="records"),
-        "kategori": kategori.to_dict(orient="records"),
-        "rating": sebaran_rating.to_dict(orient="records"),
-        "peta": kolom_peta.to_dict(orient="records"),
+        "populer": daftar_populer,
+        "peta": kolom_peta.to_dict(orient="records")
     })
+
+
+# HALAMAN ANALISIS SENTIMEN
+@app.route("/sentiment")
+def sentiment():
+    return render_template("sentiment.html")
+
+
+# HALAMAN PREDIKSI KERAMAIAN
+@app.route("/crowd")
+def crowd():
+    return render_template("crowd.html")
+
+
+# HALAMAN PERENCANAAN TRAVELING
+@app.route("/planner")
+def planner():
+    return render_template("planner.html")
+
+
+# HALAMAN CHATBOT FAQ
+@app.route("/chatbot")
+def chatbot():
+    return render_template("chatbot.html")
 
 
 if __name__ == "__main__":
