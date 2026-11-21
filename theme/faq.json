@@ -1,0 +1,168 @@
+
+{
+  "id": "javenture",
+  "name": "Javenture Travel Assistant",
+  "bot_name": "Javenture",
+  "avatar": "✈️",
+  "logo": "img/logo-javenture.png",
+  "color": "#286b43",
+  "description": "Membantu wisatawan menemukan destinasi, informasi, dan rekomendasi perjalanan di Yogyakarta.",
+  "subtitle": "Asisten wisata Yogyakarta",
+  "greeting": "Halo, traveler! 👋 Aku Javenture, teman perjalananmu menjelajahi Yogyakarta. Tanya aja seputar destinasi, wisata alam, sejarah, kuliner, atau tips perjalanan ya!",
+  "suggestions": [
+    "Rekomendasi wisata di Jogja",
+    "Wisata alam di Jogja",
+    "Tempat wisata sejarah",
+    "Kuliner khas Jogja"
+  ],
+  "fallback": [
+    "Maaf, aku belum memahami pertanyaanmu nih 😅 Coba tanyakan seputar destinasi, wisata alam, sejarah, kuliner, atau transportasi di Yogyakarta ya!",
+    "Hmm, aku belum menemukan jawaban yang sesuai. Coba gunakan kata kunci seperti rekomendasi wisata, pantai, candi, kuliner, atau transportasi."
+  ],
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "halo",
+        "hai",
+        "hello",
+        "hai javenture",
+        "pagi",
+        "selamat pagi",
+        "selamat siang",
+        "selamat malam",
+        "permisi"
+      ],
+      "responses": [
+        "Halooo! 👋 Selamat datang di Javenture. Mau menjelajahi wisata Yogyakarta ke mana hari ini?",
+        "Hai traveler! Aku Javenture, siap menemani perjalananmu di Yogyakarta. Ada yang ingin kamu tanyakan?",
+        "Halo! Yuk, cari tahu berbagai destinasi menarik di Jogja bersama Javenture! ✈️"
+      ]
+    },
+    {
+      "tag": "tentang_bot",
+      "patterns": [
+        "kamu siapa",
+        "apa itu javenture",
+        "javenture itu apa",
+        "fungsi chatbot ini",
+        "kamu bisa bantu apa",
+        "siapa yang bikin kamu"
+      ],
+      "responses": [
+        "Aku Javenture, asisten wisata digital yang membantu kamu menemukan informasi dan rekomendasi destinasi wisata di Yogyakarta.",
+        "Javenture adalah teman perjalanan digitalmu! Aku bisa membantu memberikan rekomendasi destinasi, informasi wisata, dan tips menjelajahi Yogyakarta."
+      ]
+    },
+    {
+      "tag": "rekomendasi_wisata",
+      "patterns": [
+        "rekomendasi wisata",
+        "wisata di jogja",
+        "tempat wisata jogja",
+        "destinasi menarik",
+        "tempat liburan",
+        "wisata populer",
+        "wisata terbaik di jogja"
+      ],
+      "responses": [
+        "Yogyakarta punya banyak destinasi menarik! Kamu bisa mengunjungi Malioboro, Candi Prambanan, Taman Sari, Pantai Parangtritis, atau HeHa Sky View. Kamu tertarik wisata alam, sejarah, atau kuliner?",
+        "Kalau berkunjung ke Jogja, jangan lewatkan Malioboro, Keraton Yogyakarta, Candi Prambanan, dan Hutan Pinus Mangunan. Masing-masing punya pengalaman wisata yang berbeda!"
+      ]
+    },
+    {
+      "tag": "wisata_alam",
+      "patterns": [
+        "wisata alam",
+        "pantai di jogja",
+        "gunung di jogja",
+        "hutan pinus",
+        "air terjun",
+        "pemandangan alam",
+        "wisata outdoor"
+      ],
+      "responses": [
+        "Suka suasana alam? 🌿 Kamu bisa mengunjungi Pantai Parangtritis, Pantai Indrayanti, Hutan Pinus Mangunan, atau kawasan Kaliurang.",
+        "Jogja punya banyak wisata alam yang cantik! Coba eksplorasi kawasan Mangunan untuk menikmati pemandangan perbukitan atau kunjungi pantai-pantai di Gunungkidul."
+      ]
+    },
+    {
+      "tag": "wisata_sejarah",
+      "patterns": [
+        "wisata sejarah",
+        "tempat bersejarah",
+        "candi di jogja",
+        "museum",
+        "keraton",
+        "wisata budaya",
+        "bangunan bersejarah"
+      ],
+      "responses": [
+        "Untuk wisata sejarah dan budaya, kamu bisa mengunjungi Candi Prambanan, Keraton Yogyakarta, Taman Sari, dan Museum Sonobudoyo. 🏛️",
+        "Yogyakarta kaya akan sejarah dan budaya. Jangan lewatkan Candi Prambanan dan kawasan Keraton Yogyakarta untuk mengenal sejarahnya lebih dekat!"
+      ]
+    },
+    {
+      "tag": "wisata_kuliner",
+      "patterns": [
+        "kuliner jogja",
+        "makanan khas jogja",
+        "makanan enak",
+        "wisata kuliner",
+        "gudeg",
+        "oleh oleh jogja",
+        "tempat makan"
+      ],
+      "responses": [
+        "Wajib coba kuliner khas Jogja seperti Gudeg, Bakpia, Sate Klathak, dan Oseng Mercon. Selamat berburu kuliner! 🍜",
+        "Kalau ke Jogja, jangan pulang sebelum mencicipi Gudeg dan Bakpia. Dua kuliner ini cocok banget buat pengalaman wisata kulinermu!"
+      ]
+    },
+    {
+      "tag": "transportasi",
+      "patterns": [
+        "transportasi jogja",
+        "kendaraan di jogja",
+        "cara keliling jogja",
+        "bus jogja",
+        "trans jogja",
+        "transportasi umum",
+        "sewa kendaraan"
+      ],
+      "responses": [
+        "Kamu bisa menjelajahi Yogyakarta menggunakan Trans Jogja, kereta lokal, taksi, atau kendaraan sewa. Pilih transportasi sesuai tujuan dan kebutuhanmu ya!",
+        "Untuk berkeliling kota, kamu bisa mencoba Trans Jogja. Kalau ingin mengunjungi destinasi yang lokasinya berjauhan, kendaraan sewa juga bisa menjadi pilihan."
+      ]
+    },
+    {
+      "tag": "tips_perjalanan",
+      "patterns": [
+        "tips liburan",
+        "persiapan liburan",
+        "kapan waktu terbaik ke jogja",
+        "cuaca jogja",
+        "tips wisata jogja",
+        "apa yang harus dibawa"
+      ],
+      "responses": [
+        "Sebelum liburan ke Jogja, pastikan kamu mengecek cuaca, menyiapkan pakaian yang nyaman, membawa uang tunai secukupnya, dan menyusun itinerary perjalanan. ✨",
+        "Tips dari Javenture: datang lebih pagi ke destinasi populer agar tidak terlalu ramai. Jangan lupa membawa air minum dan menjaga kebersihan tempat wisata!"
+      ]
+    },
+    {
+      "tag": "terima_kasih",
+      "patterns": [
+        "terima kasih",
+        "makasih",
+        "thanks",
+        "thank you",
+        "oke makasih",
+        "sip terima kasih"
+      ],
+      "responses": [
+        "Sama-sama, traveler! 💚 Semoga perjalananmu di Yogyakarta menyenangkan!",
+        "Dengan senang hati! Jangan lupa eksplorasi lebih banyak destinasi bersama Javenture ya! ✈️"
+      ]
+    }
+  ]
+}

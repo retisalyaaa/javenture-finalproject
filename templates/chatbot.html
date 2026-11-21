@@ -3,39 +3,101 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Chatbot FAQ | Javenture</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Javenture Assistant</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='css/chatbot.css') }}">
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <a href="/" class="logo">Javenture.</a>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/chatbot">Chatbot FAQ</a>
-        </div>
-    </nav>
+<div class="chatbot-container">
 
-    <main class="container">
-        <div class="feature-page">
-            <span class="hero-tag">Javenture Feature</span>
-            <h1>Chatbot FAQ Wisata</h1>
+    <!-- HEADER -->
+    <header class="chat-header">
+
+        <a href="{{ url_for('dashboard') }}" class="chat-brand">
+
+            <img
+                src="{{ url_for('static', filename='img/logo-javenture.png') }}"
+                alt="Javenture Logo"
+            >
+
+            <span>Javenture Assistant</span>
+
+        </a>
+
+        <a href="{{ url_for('dashboard') }}" class="back-button">
+            <span>←</span> Kembali
+        </a>
+
+    </header>
+
+
+    <!-- CHAT CONTENT -->
+    <main class="chat-content">
+
+        <!-- BACKGROUND DECORATION -->
+        <div class="jogja-decoration decoration-one">🏛️</div>
+        <div class="jogja-decoration decoration-two">🌿</div>
+        <div class="jogja-decoration decoration-three">⛰️</div>
+
+        <!-- WELCOME -->
+        <section class="welcome">
+
+            <div class="welcome-icon">✈️</div>
+
+            <h1>Explore Jogja with Javenture!</h1>
+
             <p>
-                Dapatkan informasi mengenai destinasi wisata,
-                lokasi, jam operasional, harga tiket, dan
-                informasi perjalanan di Yogyakarta.
+                Bingung mau liburan ke mana?
+                Tanya apa saja seputar wisata Yogyakarta.
+                Aku siap membantu perjalananmu!
             </p>
-            <p>Fitur sedang dalam tahap pengembangan.</p>
-            <a href="/" class="back-link">← Kembali ke Dashboard</a>
-        </div>
+
+        </section>
+
+
+        <!-- SUGGESTIONS -->
+        <div class="suggestions" id="suggestions"></div>
+
+
+        <!-- CHAT MESSAGES -->
+        <section id="chatMessages" class="chat-messages"></section>
+
     </main>
 
-    <footer class="footer">
-        © 2026 Javenture | Explore Yogyakarta with Ease.
+
+    <!-- INPUT -->
+    <footer class="chat-input-area">
+
+        <form id="chatForm">
+
+            <input
+                type="text"
+                id="userInput"
+                placeholder="Tanyakan sesuatu tentang wisata Jogja..."
+                autocomplete="off"
+                required
+            >
+
+            <button type="submit" id="sendButton">
+                ➤
+            </button>
+
+        </form>
+
+        <p>
+            Javenture Travel Assistant · Your travel companion in Jogja 💚
+        </p>
+
     </footer>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 
 </body>
 </html>

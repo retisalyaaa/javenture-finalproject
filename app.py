@@ -1,14 +1,28 @@
 
 """Aplikasi utama Javenture."""
 
-from pathlib import Path
+import json
+import os
 import pandas as pd
-from flask import Flask, jsonify, render_template
+
+from pathlib import Path
+from chatbot_engine import ChatbotEngine, load_theme
+from pathlib import Path
+from flask import Flask, jsonify, render_template, request
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 
 app = Flask(__name__)
+
+# Memuat konfigurasi chatbot Javenture
+BASE_DIR = Path(__file__).resolve().parent
+
+CHATBOT_FILE = BASE_DIR / "theme" / "faq.json"
+
+chatbot_data = load_theme(CHATBOT_FILE)
+
+chatbot_engine = ChatbotEngine(chatbot_data)
 
 # Membaca dataset.
 def baca_csv(nama_file):
@@ -118,10 +132,42 @@ def planner():
     return render_template("planner.html")
 
 
-# HALAMAN CHATBOT FAQ
+# Halaman chatbot
 @app.route("/chatbot")
 def chatbot():
     return render_template("chatbot.html")
+
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+
+    data = request.get_json(silent=True) or {}
+
+    message = str(data.get("message", "")).strip()
+
+    if not message:
+        return jsonify({
+            "error": "Pesan tidak boleh kosong."
+        }), 400
+
+    if len(message) > 500:
+        return jsonify({
+            "error": "Pesan maksimal 500 karakter."
+        }), 400
+
+    result = chatbot_engine.reply(message)
+
+    return jsonify(result)
+
+@app.route("/api/chatbot-config")
+def chatbot_config():
+
+    return jsonify({
+        "greeting": chatbot_data["greeting"],
+        "suggestions": chatbot_data["suggestions"],
+        "bot_name": chatbot_data["bot_name"],
+        "avatar": chatbot_data["avatar"]
+    })
 
 
 if __name__ == "__main__":
