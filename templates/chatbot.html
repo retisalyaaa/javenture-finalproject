@@ -9,33 +9,16 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/chatbot.css') }}">
+    
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/header.css') }}">
 </head>
 
 <body>
 
+    {% include 'header.html' %}
+
 <div class="chatbot-container">
-
-    <!-- HEADER -->
-    <header class="chat-header">
-
-        <a href="{{ url_for('dashboard') }}" class="chat-brand">
-
-            <img
-                src="{{ url_for('static', filename='img/logo-javenture.png') }}"
-                alt="Javenture Logo"
-            >
-
-            <span>Javenture Assistant</span>
-
-        </a>
-
-        <a href="{{ url_for('dashboard') }}" class="back-button">
-            <span>←</span> Kembali
-        </a>
-
-    </header>
-
-
     <!-- CHAT CONTENT -->
     <main class="chat-content">
 

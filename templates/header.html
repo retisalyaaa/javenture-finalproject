@@ -1,0 +1,22 @@
+
+<header class="site-header">
+    <a href="{{ url_for('dashboard') }}" class="site-brand">
+        <img
+            src="{{ url_for('static', filename='img/logo-javenture.png') }}"
+            alt="Javenture Logo"
+        >
+        <span>Javenture.</span>
+    </a>
+
+    <nav class="site-nav">
+        <a href="{{ url_for('dashboard') }}">Home</a>
+        <a href="{{ url_for('dashboard') }}#about">About</a>
+        <a href="{{ url_for('dashboard') }}#destinations">Destinations</a>
+        <a href="{{ url_for('dashboard') }}#features">Features</a>
+
+        <a href="{{ url_for('dashboard') }}#destinations"
+           class="explore-button">
+            Explore Jogja
+        </a>
+    </nav>
+</header>

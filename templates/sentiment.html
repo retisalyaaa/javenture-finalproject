@@ -8,28 +8,13 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/sentiment.css') }}">
+          
+    <link rel="stylesheet"
+      href="{{ url_for('static', filename='css/header.css') }}">
 </head>
 
 <body>
-
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <a href="{{ url_for('dashboard') }}" class="logo">
-            <img src="{{ url_for('static', filename='img/logo-javenture.png') }}"
-                 alt="Logo Javenture">
-            <span>Javenture.</span>
-        </a>
-
-        <div class="nav-links">
-            <a href="{{ url_for('dashboard') }}">Home</a>
-            <a href="{{ url_for('dashboard') }}#fitur">Features</a>
-            <a href="{{ url_for('chatbot') }}">Chatbot</a>
-            <a href="{{ url_for('dashboard') }}" class="nav-button">
-                Back to Home
-            </a>
-        </div>
-    </nav>
-
+{% include 'header.html' %}
 
     <main>
 
