@@ -1,41 +1,305 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Analisis Sentimen | Javenture</title>
+
+    <title>Javenture | Sentiment Analysis</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='css/sentiment.css') }}">
 </head>
+
 <body>
 
+    <!-- NAVBAR -->
     <nav class="navbar">
-        <a href="/" class="logo">Javenture.</a>
+        <a href="{{ url_for('dashboard') }}" class="logo">
+            <img src="{{ url_for('static', filename='img/logo-javenture.png') }}"
+                 alt="Logo Javenture">
+            <span>Javenture.</span>
+        </a>
+
         <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/sentiment">Analisis Sentimen</a>
+            <a href="{{ url_for('dashboard') }}">Home</a>
+            <a href="{{ url_for('dashboard') }}#fitur">Features</a>
+            <a href="{{ url_for('chatbot') }}">Chatbot</a>
+            <a href="{{ url_for('dashboard') }}" class="nav-button">
+                Back to Home
+            </a>
         </div>
     </nav>
 
-    <main class="container">
-        <div class="feature-page">
-            <span class="hero-tag">Javenture Feature</span>
-            <h1>Analisis Sentimen Ulasan</h1>
+
+    <main>
+
+        <!-- HERO -->
+        <section class="sentiment-hero">
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <span class="hero-tag">JAVENTURE SMART FEATURE</span>
+
+                <h1>
+                    Tourism Sentiment<br>
+                    Analysis.
+                </h1>
+
+                <p>
+                    Discover what travelers think about their experiences.
+                    Analyze tourism reviews and understand the sentiment
+                    behind every journey in Yogyakarta.
+                </p>
+
+                <a href="#analyzer" class="hero-button">
+                    Analyze Your Review <span>→</span>
+                </a>
+            </div>
+
+            <div class="hero-caption">
+                ✦ Every experience tells a story
+            </div>
+        </section>
+
+
+        <!-- INTRODUCTION -->
+        <section class="intro-section section-container">
+            <div class="intro-label">
+                <span class="section-tag">UNDERSTAND TRAVELER EXPERIENCES</span>
+                <h2>Every Review Matters.</h2>
+            </div>
+
             <p>
-                Analisis ulasan wisatawan untuk mengetahui
-                kecenderungan sentimen positif, netral, dan negatif
-                terhadap destinasi wisata Yogyakarta.
+                Melalui fitur analisis sentimen, Javenture membantu
+                mengidentifikasi opini wisatawan berdasarkan ulasan
+                yang diberikan. Ulasan akan diklasifikasikan menjadi
+                sentimen positif, netral, atau negatif.
             </p>
-            <p>Fitur sedang dalam tahap pengembangan.</p>
-            <a href="/" class="back-link">← Kembali ke Dashboard</a>
-        </div>
+        </section>
+
+
+        <!-- REVIEW ANALYZER -->
+        <section class="analyzer-section" id="analyzer">
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">LET'S ANALYZE</span>
+                        <h2>Share Your Travel Experience</h2>
+                        <p>
+                            Pilih destinasi wisata dan ceritakan
+                            pengalamanmu selama berkunjung.
+                        </p>
+                    </div>
+
+                    <span class="heading-decoration">
+                        ✦ Your Voice Matters
+                    </span>
+                </div>
+
+
+                <div class="analyzer-card">
+
+                    <div class="analyzer-info">
+                        <div class="analyzer-icon">💬</div>
+                        <h3>Review Analyzer</h3>
+                        <p>
+                            Tuliskan pengalamanmu dan biarkan Javenture
+                            membantu mengenali sentimen dari ulasan tersebut.
+                        </p>
+
+                        <div class="analyzer-note">
+                            <span>✦</span>
+                            Analisis dilakukan berdasarkan teks ulasan,
+                            bukan berdasarkan rating destinasi.
+                        </div>
+                    </div>
+
+
+                    <form id="sentimentForm" class="analyzer-form">
+
+                        <div class="form-group">
+                            <label for="destination">
+                                Pilih Destinasi Wisata
+                            </label>
+
+                            <select id="destination" name="destination" required>
+                                <option value="">Pilih destinasi terlebih dahulu</option>
+
+                                {% for destination in destinations %}
+                                <option value="{{ destination }}">
+                                    {{ destination }}
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            <small>
+                                Pilih destinasi yang sesuai dengan pengalamanmu.
+                            </small>
+                        </div>
+
+
+                        <div class="form-group">
+                            <label for="review">
+                                Ceritakan Pengalamanmu
+                            </label>
+
+                            <textarea
+                                id="review"
+                                name="review"
+                                rows="6"
+                                maxlength="1000"
+                                placeholder="Contoh: Tempat wisatanya sangat indah, bersih, dan nyaman. Pemandangannya bagus sekali!"
+                                required
+                            ></textarea>
+
+                            <div class="textarea-footer">
+                                <small>
+                                    Tulis ulasan dengan jelas agar lebih mudah dianalisis.
+                                </small>
+                                <span id="charCount">0/1000</span>
+                            </div>
+                        </div>
+
+
+                        <button type="submit" class="analyze-button">
+                            <span>Analyze Sentiment</span>
+                            <span>→</span>
+                        </button>
+
+                        <p id="formMessage" class="form-message" role="status"></p>
+
+                    </form>
+                </div>
+
+
+                <!-- RESULT -->
+                <div class="result-section" id="resultSection">
+
+                    <div class="result-heading">
+                        <span class="section-tag">ANALYSIS RESULT</span>
+                        <h2>Sentiment Analysis Result</h2>
+                        <p>
+                            Hasil klasifikasi sentimen dari ulasan yang kamu masukkan.
+                        </p>
+                    </div>
+
+                    <div class="result-empty">
+                        <div class="empty-icon">✦</div>
+                        <h3>Your Result Will Appear Here</h3>
+                        <p>
+                            Belum ada ulasan yang dianalisis.
+                            Masukkan review untuk melihat hasil analisis sentimen.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- SENTIMENT OVERVIEW -->
+        <section class="overview-section">
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">SENTIMENT INSIGHTS</span>
+                        <h2>Sentiment Overview</h2>
+                        <p>
+                            Ringkasan hasil analisis sentimen dari ulasan
+                            yang diproses melalui Javenture.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="sentiment-grid">
+
+                    <div class="sentiment-card positive">
+                        <div class="sentiment-card-top">
+                            <span class="sentiment-icon">😊</span>
+                            <span class="sentiment-label">POSITIVE</span>
+                        </div>
+                        <h3>—</h3>
+                        <p>Belum ada data analisis</p>
+                    </div>
+
+
+                    <div class="sentiment-card neutral">
+                        <div class="sentiment-card-top">
+                            <span class="sentiment-icon">😐</span>
+                            <span class="sentiment-label">NEUTRAL</span>
+                        </div>
+                        <h3>—</h3>
+                        <p>Belum ada data analisis</p>
+                    </div>
+
+
+                    <div class="sentiment-card negative">
+                        <div class="sentiment-card-top">
+                            <span class="sentiment-icon">😞</span>
+                            <span class="sentiment-label">NEGATIVE</span>
+                        </div>
+                        <h3>—</h3>
+                        <p>Belum ada data analisis</p>
+                    </div>
+
+                </div>
+
+                <p class="overview-note">
+                    *Ringkasan akan diperbarui setelah model analisis
+                    sentimen dan penyimpanan hasil terintegrasi.
+                </p>
+
+            </div>
+        </section>
+
+
+        <!-- RECENT REVIEWS -->
+        <section class="history-section">
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">YOUR ACTIVITY</span>
+                        <h2>Recent Analyzed Reviews</h2>
+                        <p>
+                            Lihat kembali ulasan yang telah kamu analisis.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="history-card">
+                    <div class="history-empty">
+                        <div class="empty-icon">📝</div>
+                        <h3>No Reviews Yet</h3>
+                        <p>
+                            Riwayat analisis akan muncul di sini setelah
+                            kamu mulai menganalisis ulasan.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
     </main>
 
+
+    <!-- FOOTER -->
     <footer class="footer">
-        © 2026 Javenture | Explore Yogyakarta with Ease.
+        <a href="{{ url_for('dashboard') }}" class="footer-logo">
+            Javenture.
+        </a>
+        <p>Discover Jogja, Create Your Own Adventure.</p>
+        <span>© 2026 Javenture. All rights reserved.</span>
     </footer>
+
+
+    <script src="{{ url_for('static', filename='js/sentiment.js') }}"></script>
 
 </body>
 </html>
