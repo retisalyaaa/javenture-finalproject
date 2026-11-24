@@ -4,37 +4,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Prediksi Keramaian | Javenture</title>
+
+    <title>Javenture | Crowd Prediction</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='css/header.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/crowd.css') }}">
 </head>
+
 <body>
 
-    <nav class="navbar">
-        <a href="/" class="logo">Javenture.</a>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/crowd">Prediksi Keramaian</a>
-        </div>
-    </nav>
+    <!-- SHARED HEADER -->
+    {% include 'header.html' %}
 
-    <main class="container">
-        <div class="feature-page">
-            <span class="hero-tag">Javenture Feature</span>
-            <h1>Prediksi Keramaian Pengunjung</h1>
+
+    <main>
+
+        <!-- HERO SECTION -->
+        <section class="crowd-hero">
+
+            <div class="crowd-hero-overlay"></div>
+
+            <div class="crowd-hero-content">
+                <span class="hero-tag">JAVENTURE SMART FEATURE</span>
+
+                <h1>
+                    Tourism Crowd<br>
+                    Prediction.
+                </h1>
+
+                <p>
+                    Plan your journey smarter by understanding
+                    tourist crowd conditions. Find the right time
+                    to explore your favorite destinations in Yogyakarta.
+                </p>
+
+                <a href="#prediction" class="hero-button">
+                    Check Crowd Prediction <span>→</span>
+                </a>
+            </div>
+
+            <div class="hero-caption">
+                ✦ Explore more, wait less
+            </div>
+
+        </section>
+
+
+        <!-- INTRODUCTION -->
+        <section class="crowd-intro section-container">
+
+            <div>
+                <span class="section-tag">TRAVEL SMARTER WITH JAVENTURE</span>
+                <h2>Choose the Right Time to Explore.</h2>
+            </div>
+
             <p>
-                Perkirakan tingkat keramaian destinasi wisata
-                berdasarkan hari dan waktu kunjungan.
+                Setiap destinasi wisata memiliki tingkat kunjungan
+                yang berbeda pada waktu tertentu. Melalui fitur
+                Crowd Prediction, Javenture nantinya membantu
+                memperkirakan kepadatan pengunjung agar kamu
+                dapat merencanakan perjalanan dengan lebih nyaman.
             </p>
-            <p>Fitur sedang dalam tahap pengembangan.</p>
-            <a href="/" class="back-link">← Kembali ke Dashboard</a>
-        </div>
+
+        </section>
+
+
+        <!-- PREDICTION SECTION -->
+        <section class="prediction-section" id="prediction">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">PLAN YOUR VISIT</span>
+                        <h2>Check Tourist Crowd</h2>
+                        <p>
+                            Tentukan destinasi dan waktu kunjungan
+                            untuk mengetahui perkiraan kondisi keramaian.
+                        </p>
+                    </div>
+
+                    <span class="heading-decoration">
+                        ✦ Smart Travel Planning
+                    </span>
+                </div>
+
+
+                <div class="prediction-card">
+
+                    <!-- FORM -->
+                    <div class="prediction-form-area">
+
+                        <div class="prediction-icon">📍</div>
+
+                        <h3>Where Are You Going?</h3>
+
+                        <p>
+                            Lengkapi informasi perjalananmu
+                            untuk memulai prediksi kepadatan.
+                        </p>
+
+
+                        <form id="crowdForm">
+
+                            <div class="form-group">
+                                <label for="destination">
+                                    Tourist Destination
+                                </label>
+
+                                <select id="destination"
+                                        name="destination"
+                                        required>
+
+                                    <option value="">
+                                        Choose a destination
+                                    </option>
+
+                                    {% for destination in destinations %}
+                                    <option value="{{ destination }}">
+                                        {{ destination }}
+                                    </option>
+                                    {% endfor %}
+
+                                </select>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label for="visitDate">
+                                    Visit Date
+                                </label>
+
+                                <input type="date"
+                                       id="visitDate"
+                                       name="visitDate"
+                                       required>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label for="visitTime">
+                                    Visit Time
+                                </label>
+
+                                <select id="visitTime"
+                                        name="visitTime"
+                                        required>
+
+                                    <option value="">
+                                        Choose visit time
+                                    </option>
+
+                                    <option value="06:00">06:00 AM</option>
+                                    <option value="07:00">07:00 AM</option>
+                                    <option value="08:00">08:00 AM</option>
+                                    <option value="09:00">09:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">01:00 PM</option>
+                                    <option value="14:00">02:00 PM</option>
+                                    <option value="15:00">03:00 PM</option>
+                                    <option value="16:00">04:00 PM</option>
+                                    <option value="17:00">05:00 PM</option>
+                                    <option value="18:00">06:00 PM</option>
+                                    <option value="19:00">07:00 PM</option>
+                                    <option value="20:00">08:00 PM</option>
+
+                                </select>
+                            </div>
+
+
+                            <button type="submit" class="predict-button">
+                                <span>Predict Crowd Level</span>
+                                <span>→</span>
+                            </button>
+
+                            <p id="crowdMessage"
+                               class="crowd-message"
+                               role="status"></p>
+
+                        </form>
+
+                    </div>
+
+
+                    <!-- RESULT PREVIEW -->
+                    <div class="prediction-result">
+
+                        <div class="result-top">
+                            <div>
+                                <span class="section-tag">PREDICTION RESULT</span>
+                                <h3>Crowd Level</h3>
+                            </div>
+
+                            <span class="result-status">
+                                Waiting for input
+                            </span>
+                        </div>
+
+
+                        <div class="result-empty">
+
+                            <div class="crowd-illustration">
+                                <span>👥</span>
+                            </div>
+
+                            <h3>Your Prediction Will Appear Here</h3>
+
+                            <p>
+                                Pilih destinasi dan waktu kunjungan
+                                untuk melihat hasil prediksi kepadatan
+                                pengunjung.
+                            </p>
+
+                        </div>
+
+
+                        <div class="crowd-scale">
+
+                            <div class="scale-item">
+                                <span class="scale-dot low"></span>
+                                <div>
+                                    <strong>Low</strong>
+                                    <small>Low crowd density</small>
+                                </div>
+                            </div>
+
+                            <div class="scale-item">
+                                <span class="scale-dot medium"></span>
+                                <div>
+                                    <strong>Medium</strong>
+                                    <small>Moderate crowd density</small>
+                                </div>
+                            </div>
+
+                            <div class="scale-item">
+                                <span class="scale-dot high"></span>
+                                <div>
+                                    <strong>High</strong>
+                                    <small>High crowd density</small>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CROWD INSIGHTS -->
+        <section class="insights-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">CROWD INSIGHTS</span>
+                        <h2>Understand the Crowd.</h2>
+                        <p>
+                            Kenali informasi kepadatan pengunjung
+                            untuk membantu merencanakan perjalanan.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="insights-grid">
+
+                    <div class="insight-card">
+                        <div class="insight-icon">👥</div>
+                        <h3>Crowd Density</h3>
+                        <p>
+                            Informasi mengenai tingkat kepadatan
+                            pengunjung di suatu destinasi wisata.
+                        </p>
+                    </div>
+
+
+                    <div class="insight-card">
+                        <div class="insight-icon">🕒</div>
+                        <h3>Visit Time</h3>
+                        <p>
+                            Perkiraan kondisi keramaian berdasarkan
+                            waktu kunjungan yang dipilih.
+                        </p>
+                    </div>
+
+
+                    <div class="insight-card">
+                        <div class="insight-icon">🧭</div>
+                        <h3>Travel Planning</h3>
+                        <p>
+                            Membantu wisatawan mempertimbangkan
+                            waktu kunjungan yang lebih nyaman.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- HISTORY -->
+        <section class="history-section">
+
+            <div class="section-container">
+
+                <div class="section-heading">
+                    <div>
+                        <span class="section-tag">YOUR ACTIVITY</span>
+                        <h2>Recent Predictions</h2>
+                        <p>
+                            Riwayat prediksi kepadatan destinasi
+                            yang pernah kamu lakukan.
+                        </p>
+                    </div>
+                </div>
+
+
+                <div class="history-card">
+
+                    <div class="history-empty">
+                        <div class="history-icon">📊</div>
+
+                        <h3>No Prediction History Yet</h3>
+
+                        <p>
+                            Riwayat prediksi akan muncul di sini
+                            setelah kamu mulai menggunakan fitur ini.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
     </main>
 
+
+    <!-- FOOTER -->
     <footer class="footer">
-        © 2026 Javenture | Explore Yogyakarta with Ease.
+
+        <a href="{{ url_for('dashboard') }}" class="footer-logo">
+            Javenture.
+        </a>
+
+        <p>Discover Jogja, Create Your Own Adventure.</p>
+
+        <span>© 2026 Javenture. All rights reserved.</span>
+
     </footer>
+
+
+    <script src="{{ url_for('static', filename='js/crowd.js') }}"></script>
 
 </body>
 </html>
