@@ -1,5 +1,6 @@
 const plannerForm = document.getElementById("plannerForm");
 const formMessage = document.getElementById("formMessage");
+const receiptPrinter = document.getElementById("receiptPrinter");
 
 plannerForm.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -24,18 +25,17 @@ plannerForm.addEventListener("submit", function (event) {
     // Validasi jumlah orang
     if (Number(travelers) < 1 || Number(travelers) > 50) {
         formMessage.textContent =
-            "Please enter a number of travelers between 1 and 50.";
+            "Please enter between 1 and 50 travelers.";
 
         formMessage.style.color = "#c45b4b";
         return;
     }
 
-    // Mengambil semua minat wisata yang dipilih
+    // Mengambil preferensi perjalanan
     const selectedInterests = Array.from(interests).map(
         interest => interest.value
     );
 
-    // Menampilkan data input di console untuk pengecekan
     const travelPreferences = {
         duration: duration,
         travelers: travelers,
@@ -45,8 +45,23 @@ plannerForm.addEventListener("submit", function (event) {
 
     console.log("Travel Preferences:", travelPreferences);
 
+    // Pesan berhasil
     formMessage.textContent =
-        "Your preferences have been recorded. Itinerary generation will be available soon!";
+        "Your travel preferences have been submitted!";
 
     formMessage.style.color = "#527b4d";
+
+    // Mengulang animasi jika tombol ditekan kembali
+    receiptPrinter.classList.remove("printing");
+
+    // Memulai animasi struk keluar dari printer
+    setTimeout(function () {
+        receiptPrinter.classList.add("printing");
+
+        document.getElementById("itinerary-result").scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }, 100);
 });
