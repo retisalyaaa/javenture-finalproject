@@ -1,40 +1,280 @@
-
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Travel Planner | Javenture</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+          href="{{ url_for('static', filename='css/header.css') }}">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/planner.css') }}">
 </head>
 <body>
 
-    <nav class="navbar">
-        <a href="/" class="logo">Javenture.</a>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/planner">Travel Planner</a>
-        </div>
-    </nav>
+    {% include 'header.html' %}
 
-    <main class="container">
-        <div class="feature-page">
-            <span class="hero-tag">Javenture Feature</span>
-            <h1>Travel Planner</h1>
-            <p>
-                Susun rencana perjalanan wisata di Yogyakarta
-                berdasarkan destinasi pilihan dan durasi perjalanan.
-            </p>
-            <p>Fitur sedang dalam tahap pengembangan.</p>
-            <a href="/" class="back-link">← Kembali ke Dashboard</a>
-        </div>
+    <main>
+
+        <!-- HERO SECTION -->
+        <section class="planner-hero">
+            <div class="hero-content">
+                <span class="hero-label">YOUR PERSONAL TRAVEL GUIDE</span>
+
+                <h1>
+                    Plan Your Perfect
+                    <span>Jogja Journey.</span>
+                </h1>
+
+                <p>
+                    Tell us what kind of trip you love.
+                    Let Javenture help you create a memorable
+                    journey around Yogyakarta.
+                </p>
+
+                <a href="#planner-form" class="hero-button">
+                    Create My Itinerary
+                    <i class="arrow">↓</i>
+                </a>
+            </div>
+        </section>
+
+
+        <!-- PLANNER FORM -->
+        <section class="planner-section" id="planner-form">
+
+            <div class="section-heading">
+                <span class="section-label">LET'S GET STARTED</span>
+                <h2>Plan Your Journey</h2>
+                <p>
+                    Customize your travel preferences
+                    and let us create your ideal itinerary.
+                </p>
+            </div>
+
+            <div class="planner-card">
+
+                <form id="plannerForm">
+
+                    <!-- DURASI -->
+                    <div class="form-group">
+                        <label for="duration">
+                            <span class="number">01</span>
+                            Trip Duration
+                        </label>
+
+                        <p class="field-description">
+                            How long will you explore Yogyakarta?
+                        </p>
+
+                        <select id="duration" name="duration" required>
+                            <option value="" disabled selected>
+                                Select your trip duration
+                            </option>
+                            <option value="1">1 Day</option>
+                            <option value="2">2 Days</option>
+                            <option value="3">3 Days</option>
+                        </select>
+                    </div>
+
+
+                    <!-- JUMLAH ORANG -->
+                    <div class="form-group">
+                        <label for="travelers">
+                            <span class="number">02</span>
+                            Number of Travelers
+                        </label>
+
+                        <p class="field-description">
+                            How many people are joining your trip?
+                        </p>
+
+                        <input
+                            type="number"
+                            id="travelers"
+                            name="travelers"
+                            min="1"
+                            max="50"
+                            placeholder="Enter number of travelers"
+                            required
+                        >
+                    </div>
+
+
+                    <!-- MINAT WISATA -->
+                    <div class="form-group">
+                        <label>
+                            <span class="number">03</span>
+                            Travel Interests
+                        </label>
+
+                        <p class="field-description">
+                            Choose the types of destinations you enjoy.
+                        </p>
+
+                        <div class="interest-grid">
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="alam">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">🌿</span>
+                                    <span>Nature</span>
+                                </span>
+                            </label>
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="pantai">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">🏖️</span>
+                                    <span>Beach</span>
+                                </span>
+                            </label>
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="budaya dan sejarah">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">🏛️</span>
+                                    <span>Culture & History</span>
+                                </span>
+                            </label>
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="hiburan">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">🎡</span>
+                                    <span>Entertainment</span>
+                                </span>
+                            </label>
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="kuliner">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">🍜</span>
+                                    <span>Culinary</span>
+                                </span>
+                            </label>
+
+                            <label class="interest-option">
+                                <input type="checkbox"
+                                       name="interests"
+                                       value="keluarga">
+
+                                <span class="interest-content">
+                                    <span class="interest-icon">👨‍👩‍👧</span>
+                                    <span>Family</span>
+                                </span>
+                            </label>
+
+                        </div>
+
+                        <small class="input-hint">
+                            You can choose more than one interest.
+                        </small>
+                    </div>
+
+
+                    <!-- JAM MULAI -->
+                    <div class="form-group">
+                        <label for="startTime">
+                            <span class="number">04</span>
+                            Starting Time
+                        </label>
+
+                        <p class="field-description">
+                            When would you like to start your journey?
+                        </p>
+
+                        <select id="startTime" name="startTime" required>
+                            <option value="" disabled selected>
+                                Select your starting time
+                            </option>
+                            <option value="07:00">07:00 AM</option>
+                            <option value="08:00">08:00 AM</option>
+                            <option value="09:00">09:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                        </select>
+                    </div>
+
+
+                    <!-- SUBMIT -->
+                    <button type="submit" class="generate-button">
+                        <span>Generate My Itinerary</span>
+                        <span class="button-arrow">→</span>
+                    </button>
+
+                    <p id="formMessage" class="form-message"></p>
+
+                </form>
+
+            </div>
+        </section>
+
+
+        <!-- ITINERARY RESULT -->
+        <section class="result-section" id="itinerary-result">
+
+            <div class="section-heading">
+                <span class="section-label">YOUR NEXT ADVENTURE</span>
+                <h2>Your Travel Itinerary</h2>
+                <p>
+                    Your personalized Yogyakarta travel plan
+                    will appear here.
+                </p>
+            </div>
+
+            <div class="empty-result" id="emptyResult">
+
+                <div class="empty-icon">
+                    <span>🗺️</span>
+                </div>
+
+                <h3>Your journey starts here!</h3>
+
+                <p>
+                    Complete your travel preferences above
+                    and let Javenture create your personalized
+                    itinerary.
+                </p>
+
+                <a href="#planner-form">
+                    Start Planning
+                    <span>→</span>
+                </a>
+
+            </div>
+
+            <!-- Hasil itinerary akan ditampilkan di sini nantinya -->
+            <div id="itineraryOutput"></div>
+
+        </section>
+
     </main>
 
-    <footer class="footer">
-        © 2026 Javenture | Explore Yogyakarta with Ease.
+
+    <!-- FOOTER -->
+    <footer class="planner-footer">
+        <p>© 2026 Javenture. Discover the beauty of Yogyakarta.</p>
     </footer>
+
+
+    <script src="{{ url_for('static', filename='js/planner.js') }}"></script>
 
 </body>
 </html>
