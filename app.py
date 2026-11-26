@@ -3,6 +3,8 @@
 
 import json
 import os
+import re
+import joblib
 import pandas as pd
 
 from pathlib import Path
@@ -14,6 +16,17 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 
 app = Flask(__name__)
+
+# Memuat model analisis sentimen
+MODEL_PATH = ROOT / "models" / "model_sentiment.pkl"
+
+if not MODEL_PATH.exists():
+    raise FileNotFoundError(
+        "Model sentiment tidak ditemukan. "
+        "Pastikan model_sentiment.pkl berada di folder model."
+    )
+
+sentiment_model = joblib.load(MODEL_PATH)
 
 # Memuat konfigurasi chatbot Javenture
 BASE_DIR = Path(__file__).resolve().parent
@@ -117,8 +130,99 @@ def data_dashboard():
 # HALAMAN ANALISIS SENTIMEN
 @app.route("/sentiment")
 def sentiment():
-    return render_template("sentiment.html")
+    destinations = sorted(
+        tempat["nama"].dropna().astype(str).unique().tolist()
+    )
 
+    return render_template(
+        "sentiment.html",
+        destinations=destinations
+    )
+
+# MEMBERSIHKAN TEKS REVIEW
+def clean_sentiment_text(text):
+    text = text.lower()
+
+    text = re.sub(r"http\S+|www\S+", "", text)
+    text = re.sub(r"\s+", " ", text)
+
+    return text.strip()
+
+
+# API ANALISIS SENTIMEN
+@app.route("/api/sentiment", methods=["POST"])
+def predict_sentiment():
+
+    data = request.get_json(silent=True) or {}
+
+    review = str(data.get("review", "")).strip()
+    destination = str(data.get("destination", "")).strip()
+
+    # Validasi input
+    if not destination or not review:
+        return jsonify({
+            "success": False,
+            "message": "Destinasi dan review wajib diisi."
+        }), 400
+
+    if len(review) < 10:
+        return jsonify({
+            "success": False,
+            "message": "Review minimal 10 karakter."
+        }), 400
+
+    if len(review) > 1000:
+        return jsonify({
+            "success": False,
+            "message": "Review maksimal 1000 karakter."
+        }), 400
+
+    # Memastikan destinasi tersedia
+    daftar_destinasi = tempat["nama"].dropna().astype(str).unique()
+
+    if destination not in daftar_destinasi:
+        return jsonify({
+            "success": False,
+            "message": "Destinasi tidak ditemukan."
+        }), 400
+
+    try:
+        # Preprocessing
+        cleaned_review = clean_sentiment_text(review)
+
+        # Prediksi sentimen
+        prediction = sentiment_model.predict([cleaned_review])[0]
+
+        # Mengambil probabilitas setiap kelas
+        probabilities = sentiment_model.predict_proba(
+            [cleaned_review]
+        )[0]
+
+        classes = sentiment_model.named_steps[
+            "classifier"
+        ].classes_
+
+        scores = {
+            label: round(float(score) * 100, 2)
+            for label, score in zip(classes, probabilities)
+        }
+
+        return jsonify({
+            "success": True,
+            "destination": destination,
+            "review": review,
+            "sentiment": prediction,
+            "probability": scores[prediction],
+            "scores": scores
+        })
+
+    except Exception as error:
+        app.logger.exception("Gagal melakukan analisis sentimen")
+
+        return jsonify({
+            "success": False,
+            "message": "Terjadi kesalahan saat menganalisis review."
+        }), 500
 
 # HALAMAN PREDIKSI KERAMAIAN
 @app.route("/crowd")

@@ -4,7 +4,7 @@ pandas
 
 # Disiapkan untuk pengembangan fitur machine learning berikutnya
 numpy
-scikit-learn
+scikit-learn==1.6.1
 joblib
 
 # Digunakan pada tahap analisis teks dan visualisasi lanjutan
