@@ -11,6 +11,7 @@ from pathlib import Path
 from chatbot_engine import ChatbotEngine, load_theme
 from pathlib import Path
 from flask import Flask, jsonify, render_template, request
+from datetime import datetime
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -27,6 +28,26 @@ if not MODEL_PATH.exists():
     )
 
 sentiment_model = joblib.load(MODEL_PATH)
+
+# Memuat model prediksi keramaian
+CROWD_MODEL_PATH = ROOT / "models" / "model_crowd.pkl"
+
+if not CROWD_MODEL_PATH.exists():
+    raise FileNotFoundError(
+        "Model crowd tidak ditemukan. "
+        "Pastikan model_crowd.pkl berada di folder models."
+    )
+
+crowd_model = joblib.load(CROWD_MODEL_PATH)
+
+# Mengambil daftar destinasi yang dikenal model
+crowd_destinations = (
+    crowd_model
+    .named_steps["preprocessing"]
+    .named_transformers_["destinasi"]
+    .categories_[0]
+    .tolist()
+)
 
 # Memuat konfigurasi chatbot Javenture
 BASE_DIR = Path(__file__).resolve().parent
@@ -227,7 +248,105 @@ def predict_sentiment():
 # HALAMAN PREDIKSI KERAMAIAN
 @app.route("/crowd")
 def crowd():
-    return render_template("crowd.html")
+    return render_template(
+        "crowd.html",
+        destinations=crowd_destinations
+    )
+
+
+# API PREDIKSI KERAMAIAN
+@app.route("/api/crowd", methods=["POST"])
+def predict_crowd():
+
+    data = request.get_json(silent=True) or {}
+
+    destination = str(data.get("destination", "")).strip()
+    visit_date = str(data.get("visitDate", "")).strip()
+    visit_time = str(data.get("visitTime", "")).strip()
+
+    # Validasi input
+    if not destination or not visit_date or not visit_time:
+        return jsonify({
+            "success": False,
+            "message": "Destinasi, tanggal, dan jam wajib diisi."
+        }), 400
+
+    if destination not in crowd_destinations:
+        return jsonify({
+            "success": False,
+            "message": "Destinasi tidak tersedia dalam model."
+        }), 400
+
+    try:
+        # Mengubah tanggal menjadi objek date
+        tanggal = datetime.strptime(
+            visit_date, "%Y-%m-%d"
+        ).date()
+
+        # Mengubah jam menjadi angka
+        jam = datetime.strptime(
+            visit_time, "%H:%M"
+        ).hour
+
+        # Mengambil kode hari: Senin = 0, Minggu = 6
+        hari = tanggal.weekday()
+
+        # Menentukan apakah tanggal termasuk weekend
+        is_weekend = int(hari in [5, 6])
+
+        # Menyiapkan input sesuai fitur training
+        input_data = pd.DataFrame([{
+            "nama_wisata": destination,
+            "hari": hari,
+            "jam": jam,
+            "is_weekend": is_weekend
+        }])
+
+        # Melakukan prediksi
+        prediction = float(
+            crowd_model.predict(input_data)[0]
+        )
+
+        prediction = max(0, min(100, prediction))
+        prediction = round(prediction, 2)
+
+        # Mengelompokkan tingkat keramaian
+        if prediction <= 30:
+            level = "Low"
+            description = "Keramaian relatif rendah. Waktu ini berpotensi lebih nyaman untuk berkunjung."
+
+        elif prediction <= 60:
+            level = "Medium"
+            description = "Keramaian tergolong sedang. Pertimbangkan waktu kunjunganmu."
+
+        else:
+            level = "High"
+            description = "Keramaian relatif tinggi. Bersiaplah menghadapi kondisi yang lebih ramai."
+
+        return jsonify({
+            "success": True,
+            "destination": destination,
+            "visit_date": visit_date,
+            "visit_day": tanggal.strftime("%A"),
+            "visit_time": visit_time,
+            "popularity_score": prediction,
+            "crowd_level": level,
+            "description": description
+        })
+
+    except ValueError:
+        return jsonify({
+            "success": False,
+            "message": "Format tanggal atau jam tidak valid."
+        }), 400
+
+    except Exception:
+        app.logger.exception("Gagal melakukan prediksi keramaian")
+
+        return jsonify({
+            "success": False,
+            "message": "Terjadi kesalahan saat melakukan prediksi."
+        }), 500
 
 
 # HALAMAN PERENCANAAN TRAVELING
