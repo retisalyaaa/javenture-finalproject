@@ -114,37 +114,16 @@
                         </p>
 
                         <div class="interest-grid">
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="alam">
-                                <span>Nature</span>
-                            </label>
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="pantai">
-                                <span>Beach</span>
-                            </label>
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="budaya dan sejarah">
-                                <span>Culture & History</span>
-                            </label>
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="hiburan">
-                                <span>Entertainment</span>
-                            </label>
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="kuliner">
-                                <span>Culinary</span>
-                            </label>
-
-                            <label class="interest-option">
-                                <input type="checkbox" name="interests" value="keluarga">
-                                <span>Family</span>
-                            </label>
-
+                            {% for category in categories %}
+                                <label class="interest-option">
+                                    <input
+                                        type="checkbox"
+                                        name="interests"
+                                        value="{{ category }}"
+                                    >
+                                    <span>{{ category }}</span>
+                                </label>
+                            {% endfor %}
                         </div>
 
                         <small class="input-hint">
@@ -174,6 +153,49 @@
                         </select>
                     </div>
 
+
+                     <!-- TOTAL TICKET BUDGET -->
+                    <div class="form-group">
+                        <label for="ticketBudget">
+                            <span class="number">05</span>
+                            Total Ticket Budget
+                        </label>
+
+                        <p class="field-description">
+                            Set your total entrance ticket budget for all travelers.
+                        </p>
+
+                        <input
+                            type="number"
+                            id="ticketBudget"
+                            name="ticketBudget"
+                            min="1"
+                            placeholder="Example: 200000"
+                            required
+                        >
+                    </div>
+
+                    <!-- JUMLAH DESTINASI -->
+                    <div class="form-group">
+                        <label for="destinationCount">
+                            <span class="number">06</span>
+                            Number of Destinations
+                        </label>
+
+                        <p class="field-description">
+                            How many places would you like to visit?
+                        </p>
+
+                        <input
+                            type="number"
+                            id="destinationCount"
+                            name="destinationCount"
+                            min="1"
+                            max="15"
+                            placeholder="Example: 5"
+                            required
+                        >
+                    </div>
 
                     <!-- SUBMIT -->
                     <button type="submit" class="generate-button">

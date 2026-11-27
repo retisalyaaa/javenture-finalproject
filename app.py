@@ -4,6 +4,7 @@
 import json
 import os
 import re
+import math
 import joblib
 import pandas as pd
 
@@ -352,7 +353,355 @@ def predict_crowd():
 # HALAMAN PERENCANAAN TRAVELING
 @app.route("/planner")
 def planner():
-    return render_template("planner.html")
+    categories = sorted(
+        tempat["kategori"]
+        .dropna()
+        .astype(str)
+        .str.strip()
+        .unique()
+        .tolist()
+    )
+
+    return render_template(
+        "planner.html",
+        categories=categories
+    )
+
+
+
+# MENGHITUNG JARAK ANTAR DESTINASI
+def hitung_jarak(lat1, lon1, lat2, lon2):
+    radius_bumi = 6371
+
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
+
+    delta_lat = lat2 - lat1
+    delta_lon = lon2 - lon1
+
+    a = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat1)
+        * math.cos(lat2)
+        * math.sin(delta_lon / 2) ** 2
+    )
+
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return radius_bumi * c
+
+
+# ESTIMASI DURASI KUNJUNGAN BERDASARKAN KATEGORI
+DURASI_KUNJUNGAN = {
+    "Alam": 90,
+    "Pantai": 120,
+    "Budaya Dan Sejarah": 90,
+    "Agrowisata": 90,
+    "Buatan": 120,
+    "Wisata Air": 120,
+    "Museum": 90,
+    "Religi": 60,
+    "Kuliner": 60,
+    "Desa Wisata": 120,
+    "Pendidikan": 90,
+    "Minat Khusus": 90,
+    "Seni": 90
+}
+
+
+# MENYUSUN RUTE DENGAN NEAREST NEIGHBOR
+def susun_rute(daftar_destinasi):
+    belum_dikunjungi = daftar_destinasi.copy()
+    rute = []
+
+    # Destinasi pertama berdasarkan ranking rekomendasi
+    lokasi_sekarang = belum_dikunjungi.pop(0)
+    rute.append(lokasi_sekarang)
+
+    while belum_dikunjungi:
+        terdekat = min(
+            belum_dikunjungi,
+            key=lambda tujuan: hitung_jarak(
+                lokasi_sekarang["latitude"],
+                lokasi_sekarang["longitude"],
+                tujuan["latitude"],
+                tujuan["longitude"]
+            )
+        )
+
+        rute.append(terdekat)
+        belum_dikunjungi.remove(terdekat)
+        lokasi_sekarang = terdekat
+
+    return rute
+
+
+# API TRAVEL PLANNER
+@app.route("/api/planner/recommendations", methods=["POST"])
+def planner_recommendations():
+
+    data = request.get_json(silent=True) or {}
+
+    try:
+        duration = int(data.get("duration", 0))
+        travelers = int(data.get("travelers", 0))
+        ticket_budget = int(data.get("ticketBudget", 0))
+        destination_count = int(data.get("destinationCount", 0))
+
+        start_time = str(data.get("startTime", "")).strip()
+        interests = data.get("interests", [])
+
+        # VALIDASI INPUT
+        if duration not in [1, 2, 3]:
+            return jsonify({
+                "success": False,
+                "message": "Trip duration tidak valid."
+            }), 400
+
+        if travelers < 1 or travelers > 50:
+            return jsonify({
+                "success": False,
+                "message": "Jumlah peserta harus 1 sampai 50 orang."
+            }), 400
+
+        if ticket_budget < 1:
+            return jsonify({
+                "success": False,
+                "message": "Total ticket budget harus lebih dari 0."
+            }), 400
+
+        if destination_count < 1 or destination_count > 15:
+            return jsonify({
+                "success": False,
+                "message": "Jumlah destinasi harus 1 sampai 15 tempat."
+            }), 400
+
+        if destination_count > len(tempat):
+            return jsonify({
+                "success": False,
+                "message": "Jumlah destinasi melebihi data yang tersedia."
+            }), 400
+
+        if not isinstance(interests, list) or not interests:
+            return jsonify({
+                "success": False,
+                "message": "Pilih minimal satu kategori wisata."
+            }), 400
+
+        waktu_mulai = datetime.strptime(
+            start_time, "%H:%M"
+        )
+
+        # FILTER DATA DESTINASI
+        hasil = tempat.copy()
+
+        hasil["kategori"] = (
+            hasil["kategori"].astype(str).str.strip()
+        )
+
+        hasil["harga_tiket"] = pd.to_numeric(
+            hasil["harga_tiket"], errors="coerce"
+        )
+
+        hasil["rating_tempat"] = pd.to_numeric(
+            hasil["rating_tempat"], errors="coerce"
+        )
+
+        hasil["jumlah_penilaian"] = pd.to_numeric(
+            hasil["jumlah_penilaian"], errors="coerce"
+        )
+
+        hasil["latitude"] = pd.to_numeric(
+            hasil["latitude"], errors="coerce"
+        )
+
+        hasil["longitude"] = pd.to_numeric(
+            hasil["longitude"], errors="coerce"
+        )
+
+        # Sesuaikan kategori dengan preferensi user
+        hasil = hasil[
+            hasil["kategori"].isin(interests)
+        ]
+
+        # Harga 0 atau kosong dianggap belum tersedia
+        # sehingga tidak dipakai dalam perhitungan budget
+        hasil = hasil[
+            hasil["harga_tiket"].notna()
+            & (hasil["harga_tiket"] > 0)
+        ]
+
+        # Destinasi harus memiliki koordinat
+        hasil = hasil.dropna(
+            subset=["latitude", "longitude", "rating_tempat"]
+        )
+
+        # Urutkan berdasarkan rating dan jumlah penilaian
+        hasil = hasil.sort_values(
+            by=["rating_tempat", "jumlah_penilaian"],
+            ascending=[False, False]
+        )
+
+        # PILIH DESTINASI SESUAI TOTAL BUDGET
+        rekomendasi = []
+        total_biaya = 0
+
+        for _, baris in hasil.iterrows():
+
+            harga_per_orang = int(baris["harga_tiket"])
+            biaya_destinasi = harga_per_orang * travelers
+
+            if total_biaya + biaya_destinasi <= ticket_budget:
+
+                rekomendasi.append({
+                    "place_id": int(baris["place_id"]),
+                    "nama": str(baris["nama"]),
+                    "kategori": str(baris["kategori"]),
+                    "rating": float(baris["rating_tempat"]),
+                    "harga_tiket": harga_per_orang,
+                    "latitude": float(baris["latitude"]),
+                    "longitude": float(baris["longitude"]),
+                    "jumlah_penilaian": int(
+                        baris["jumlah_penilaian"]
+                    ),
+                    "deskripsi": str(baris["deskripsi"])
+                })
+
+                total_biaya += biaya_destinasi
+
+            if len(rekomendasi) == destination_count:
+                break
+
+        # Jika budget tidak mencukupi
+        if len(rekomendasi) < destination_count:
+            return jsonify({
+                "success": False,
+                "message": (
+                    f"Budget belum mencukupi untuk "
+                    f"{destination_count} destinasi. "
+                    f"Dengan budget tersebut, sistem hanya "
+                    f"menemukan {len(rekomendasi)} destinasi "
+                    f"yang sesuai. Coba tambah budget atau "
+                    f"kurangi jumlah destinasi."
+                ),
+                "available": len(rekomendasi)
+            }), 400
+
+        # BAGI DESTINASI KE SETIAP HARI
+        jumlah_per_hari = [
+            destination_count // duration
+            + (1 if hari < destination_count % duration else 0)
+            for hari in range(duration)
+        ]
+
+        daftar_hari = []
+        indeks = 0
+
+        for nomor_hari, jumlah_hari in enumerate(
+            jumlah_per_hari, start=1
+        ):
+
+            destinasi_hari = rekomendasi[
+                indeks:indeks + jumlah_hari
+            ]
+
+            indeks += jumlah_hari
+
+            # Susun rute berdasarkan jarak
+            rute = susun_rute(destinasi_hari)
+
+            waktu_sekarang = waktu_mulai
+            jadwal = []
+
+            for nomor, destinasi in enumerate(rute):
+
+                # Tambahkan waktu perjalanan
+                if nomor > 0:
+                    sebelumnya = rute[nomor - 1]
+
+                    jarak = hitung_jarak(
+                        sebelumnya["latitude"],
+                        sebelumnya["longitude"],
+                        destinasi["latitude"],
+                        destinasi["longitude"]
+                    )
+
+                    # Estimasi kecepatan rata-rata 25 km/jam
+                    waktu_perjalanan = max(
+                        15, math.ceil(jarak / 25 * 60)
+                    )
+
+                    waktu_selesai = (
+                        waktu_sekarang
+                        + pd.Timedelta(minutes=waktu_perjalanan)
+                    )
+
+                    jadwal.append({
+                        "type": "travel",
+                        "start": waktu_sekarang.strftime("%H:%M"),
+                        "end": waktu_selesai.strftime("%H:%M"),
+                        "duration": waktu_perjalanan,
+                        "distance": round(jarak, 2)
+                    })
+
+                    waktu_sekarang = waktu_selesai
+
+                # Durasi kunjungan
+                durasi = DURASI_KUNJUNGAN.get(
+                    destinasi["kategori"], 90
+                )
+
+                waktu_selesai = (
+                    waktu_sekarang
+                    + pd.Timedelta(minutes=durasi)
+                )
+
+                jadwal.append({
+                    "type": "visit",
+                    "destination": destinasi,
+                    "start": waktu_sekarang.strftime("%H:%M"),
+                    "end": waktu_selesai.strftime("%H:%M"),
+                    "duration": durasi
+                })
+
+                waktu_sekarang = waktu_selesai
+
+            daftar_hari.append({
+                "day": nomor_hari,
+                "destinations": len(rute),
+                "schedule": jadwal
+            })
+
+        return jsonify({
+            "success": True,
+            "duration": duration,
+            "travelers": travelers,
+            "start_time": start_time,
+            "destination_count": len(rekomendasi),
+            "ticket_budget": ticket_budget,
+            "total_ticket_cost": total_biaya,
+            "remaining_budget": ticket_budget - total_biaya,
+            "days": daftar_hari
+        })
+
+    except ValueError:
+        return jsonify({
+            "success": False,
+            "message": "Periksa kembali format input perjalanan."
+        }), 400
+
+    except Exception:
+        app.logger.exception(
+            "Gagal membuat itinerary perjalanan"
+        )
+
+        return jsonify({
+            "success": False,
+            "message": "Terjadi kesalahan saat membuat itinerary."
+        }), 500
+
 
 
 # Halaman chatbot
