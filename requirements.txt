@@ -6,6 +6,7 @@ pandas
 numpy
 scikit-learn==1.6.1
 joblib
+requests
 
 # Digunakan pada tahap analisis teks dan visualisasi lanjutan
 matplotlib
