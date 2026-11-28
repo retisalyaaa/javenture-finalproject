@@ -1,4 +1,3 @@
-
 """Aplikasi utama Javenture."""
 
 import json
@@ -7,12 +6,14 @@ import re
 import math
 import joblib
 import pandas as pd
+import requests
 
 from pathlib import Path
-from chatbot_engine import ChatbotEngine, load_theme
-from pathlib import Path
-from flask import Flask, jsonify, render_template, request
+from functools import lru_cache
 from datetime import datetime
+from flask import Flask, jsonify, render_template, request
+
+from chatbot_engine import ChatbotEngine, load_theme
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -76,20 +77,56 @@ rating = baca_csv("rating_interactions.csv")
 pengguna = baca_csv("users_kaggle.csv")
 
 
-# Foto destinasi berdasarkan nama atau kategori.
-FOTO_DESTINASI = {
-    "tamansari water castle":
-        "https://commons.wikimedia.org/wiki/Special:FilePath/Taman%20Sari%2C%20Yogyakarta.jpg",
+@lru_cache(maxsize=500)
+def cari_foto_destinasi(nama_wisata):
+    """
+    Mengambil foto destinasi berdasarkan halaman Wikipedia
+    yang sesuai dengan nama tempat wisata.
+    """
 
-    "budaya dan sejarah":
-        "https://commons.wikimedia.org/wiki/Special:FilePath/Yogyakarta%20Indonesia%20Prambanan-temple-complex-05.jpg",
+    url_api = "https://id.wikipedia.org/w/api.php"
 
-    "alam":
-        "https://commons.wikimedia.org/wiki/Special:FilePath/Bukit%20Bintang%20Yogyakarta.jpg",
+    parameter = {
+        "action": "query",
+        "format": "json",
+        "formatversion": 2,
+        "prop": "pageimages",
+        "titles": nama_wisata,
+        "piprop": "thumbnail",
+        "pithumbsize": 700,
+        "redirects": 1
+    }
 
-    "pantai":
-        "https://commons.wikimedia.org/wiki/Special:FilePath/Perahu%20di%20Pantai%20Drini.jpg",
-}
+    try:
+        response = requests.get(
+            url_api,
+            params=parameter,
+            headers={
+                "User-Agent": "Javenture/1.0 (tourism application)"
+            },
+            timeout=3
+        )
+
+        response.raise_for_status()
+
+        hasil = response.json()
+        halaman = hasil.get("query", {}).get("pages", [])
+
+        for page in halaman:
+            thumbnail = page.get("thumbnail")
+
+            if thumbnail:
+                return thumbnail.get("source")
+
+    except requests.RequestException as error:
+        app.logger.warning(
+            "Gagal mengambil foto %s: %s",
+            nama_wisata,
+            error
+        )
+
+    return None
+
 
 # HALAMAN DASHBOARD
 @app.route("/")
@@ -99,55 +136,105 @@ def dashboard():
 
 @app.route("/api/dashboard")
 def data_dashboard():
-    """Mengirim rekomendasi destinasi dan data peta."""
+    """Mengirim Top 10 destinasi dan data peta."""
 
-    # Urutkan destinasi berdasarkan jumlah penilaian.
-    populer = tempat.nlargest(
-        10, "jumlah_penilaian"
-    ).copy()
+    try:
+        # =====================================
+        # TOP 10 DESTINASI BERDASARKAN RATING
+        # =====================================
 
-    daftar_populer = []
+        top_destinations = tempat.copy()
 
-    for _, baris in populer.iterrows():
-        kategori = str(baris["kategori"]).lower()
-        nama = str(baris["nama"]).lower()
+        # Pastikan rating berupa angka
+        top_destinations["rating_tempat"] = pd.to_numeric(
+            top_destinations["rating_tempat"],
+            errors="coerce"
+        )
 
-        # Cari foto berdasarkan nama destinasi.
-        foto = FOTO_DESTINASI.get(nama)
-
-        # Jika tidak ada, gunakan foto berdasarkan kategori.
-        if not foto:
-            foto = FOTO_DESTINASI.get(
-                kategori,
-                "/static/img/hero-jogja.png"
+        # Urutkan hanya berdasarkan rating tertinggi
+        top_destinations = (
+            top_destinations
+            .dropna(subset=["rating_tempat"])
+            .sort_values(
+                by="rating_tempat",
+                ascending=False,
+                kind="stable"
             )
+            .head(10)
+        )
 
-        daftar_populer.append({
-            "nama": baris["nama"],
-            "kategori": baris["kategori"],
-            "rating_tempat": float(baris["rating_tempat"]),
-            "jumlah_penilaian": int(baris["jumlah_penilaian"]),
-            "foto": foto
+        # Ubah menjadi list untuk dikirim sebagai JSON
+        popular = []
+
+        for _, row in top_destinations.iterrows():
+
+            nama_wisata = str(row["nama"])
+
+            popular.append({
+                "nama": nama_wisata,
+                "kategori": str(row["kategori"]),
+                "rating_tempat": float(row["rating_tempat"]),
+                "jumlah_penilaian": int(
+                    row["jumlah_penilaian"]
+                ),
+                "foto": cari_foto_destinasi(nama_wisata)
+            })
+
+        # =====================================
+        # DATA UNTUK PETA DESTINASI
+        # =====================================
+
+        kolom_peta = tempat[
+            [
+                "nama",
+                "kategori",
+                "latitude",
+                "longitude",
+                "rating_tempat"
+            ]
+        ].copy()
+
+        # Pastikan koordinat dan rating berupa angka
+        kolom_peta["latitude"] = pd.to_numeric(
+            kolom_peta["latitude"],
+            errors="coerce"
+        )
+
+        kolom_peta["longitude"] = pd.to_numeric(
+            kolom_peta["longitude"],
+            errors="coerce"
+        )
+
+        kolom_peta["rating_tempat"] = pd.to_numeric(
+            kolom_peta["rating_tempat"],
+            errors="coerce"
+        )
+
+        kolom_peta = kolom_peta.dropna(
+            subset=["latitude", "longitude"]
+        )
+
+        peta = kolom_peta.to_dict(orient="records")
+
+        # =====================================
+        # KIRIM DATA KE DASHBOARD
+        # =====================================
+
+        return jsonify({
+            "populer": popular,
+            "peta": peta
         })
 
-    # Siapkan data koordinat untuk peta.
-    kolom_peta = tempat[[
-        "nama",
-        "kategori",
-        "latitude",
-        "longitude",
-        "rating_tempat"
-    ]].copy()
+    except Exception:
+        app.logger.exception(
+            "Gagal mengambil data dashboard"
+        )
 
-    kolom_peta = kolom_peta.where(
-        pd.notna(kolom_peta), None
-    )
-
-    return jsonify({
-        "populer": daftar_populer,
-        "peta": kolom_peta.to_dict(orient="records")
-    })
-
+        return jsonify({
+            "success": False,
+            "message": "Data dashboard gagal dimuat."
+        }), 500
+    
 
 # HALAMAN ANALISIS SENTIMEN
 @app.route("/sentiment")

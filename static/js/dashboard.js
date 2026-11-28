@@ -12,11 +12,19 @@ async function muatDashboard() {
 
         const data = await response.json();
 
+        // Memastikan data tersedia
+        if (!Array.isArray(data.populer) || !Array.isArray(data.peta)) {
+            throw new Error("Format data dashboard tidak sesuai.");
+        }
+
         tampilkanDestinasi(data.populer);
         tampilkanPeta(data.peta);
 
+        // Hilangkan pesan error jika data berhasil dimuat
+        document.getElementById("pesanError").textContent = "";
+
     } catch (error) {
-        console.error(error);
+        console.error("Dashboard error:", error);
 
         document.getElementById("pesanError").textContent =
             "Data destinasi belum berhasil dimuat. Silakan refresh halaman.";
@@ -39,18 +47,12 @@ function tampilkanDestinasi(destinasi) {
         const peringkat = index + 1;
 
         kartu.innerHTML = `
-            <div class="destination-image">
-                <img
-                    src="${escapeHTML(foto)}"
-                    alt="${escapeHTML(tempat.nama)}"
-                    loading="lazy"
-                    onerror="this.onerror=null; this.src='${gambarDefault}'"
-                >
-
-                <span class="rank-badge ${peringkat === 1 ? "first" : ""}">
-                    ${peringkat}
-                </span>
-            </div>
+            <img
+                src="${escapeHTML(foto)}"
+                alt="${escapeHTML(tempat.nama)}"
+                loading="lazy"
+                onerror="this.onerror=null; this.src='${gambarDefault}'"
+            >
 
             <div class="destination-info">
                 <span class="destination-category">
@@ -95,6 +97,17 @@ function escapeHTML(nilai) {
 
 // Menampilkan peta persebaran wisata.
 function tampilkanPeta(destinasi) {
+    const elemenPeta = document.getElementById("map");
+
+    if (!elemenPeta) {
+        return;
+    }
+
+    // Hindari membuat peta berulang kali
+    if (elemenPeta._leaflet_id) {
+        return;
+    }
+
     const peta = L.map("map").setView([-7.7956, 110.3695], 10);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

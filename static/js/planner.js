@@ -31,7 +31,7 @@ function escapeHTML(teks) {
 
 
 // MEMBUAT TAMPILAN ITINERARY
-function tampilkanItinerary(data) {
+function tampilkanItinerary(data, ticketBudget) {
     const receiptContent = document.querySelector(".receipt-content");
 
     let isiReceipt = `
@@ -117,22 +117,9 @@ function tampilkanItinerary(data) {
                             ${escapeHTML(destinasi.nama)}
                         </strong>
 
-                        <span>
-                            ${escapeHTML(destinasi.kategori)}
-                        </span>
-
                         <p>
-                            ${escapeHTML(destinasi.deskripsi)}
-                        </p>
-
+                            Ticket: ${formatRupiah(destinasi.harga_tiket)}/ person
                         <p>
-                            Rating: ${destinasi.rating.toFixed(1)} / 5
-                            <br>
-                            Ticket: ${formatRupiah(destinasi.harga_tiket)}
-                            / person
-                            <br>
-                            Estimated visit: ${item.duration} minutes
-                        </p>
                     </div>
                 `;
             }
@@ -145,17 +132,12 @@ function tampilkanItinerary(data) {
 
         <div class="receipt-total">
             <span>TOTAL TICKET BUDGET</span>
-            <strong>${formatRupiah(data.ticket_budget)}</strong>
+            <strong>${formatRupiah(ticketBudget)}</strong>
         </div>
 
         <div class="receipt-total">
             <span>TOTAL TICKET COST</span>
             <strong>${formatRupiah(data.total_ticket_cost)}</strong>
-        </div>
-
-        <div class="receipt-total">
-            <span>REMAINING BUDGET</span>
-            <strong>${formatRupiah(data.remaining_budget)}</strong>
         </div>
 
         <div class="receipt-divider"></div>
@@ -267,7 +249,7 @@ plannerForm.addEventListener("submit", async function (event) {
             );
         }
 
-        tampilkanItinerary(data);
+        tampilkanItinerary(data, ticketBudget);;
 
         formMessage.textContent =
             "Your personalized itinerary is ready!";
